@@ -1,0 +1,40 @@
+---
+driver:
+  name: vagrant
+  customize:
+    memory: 4096
+
+provisioner:
+  name: chef_zero
+
+platforms:
+  - name: centos-7.1
+    driver:
+      box: centos-71
+      network:
+        - ["forwarded_port", {guest: 80, host: 8080}]
+
+suites:
+  - name: default
+    run_list:
+      - recipe[firewall::default]
+      - recipe[jenkins::default]
+    attributes:
+      nginx:
+        default_site_enabled: false
+      tomcat:
+        user: 'tomcat'
+        group: 'tomcat'
+        java_options:
+          '-server -Xms512m -Xmx512m -XX:PermSize=256m -XX:MaxPermSize=256M
+          -Djava.awt.headless=true -Dcom.sun.management.jmxremote
+          -Dcom.sun.management.jmxremote.authenticate=false
+          -Dcom.sun.management.jmxremote.ssl=false
+          -Dcom.sun.management.jmxremote.port=9005
+          -DJENKINS_HOME=/opt/jenkins -Dmail.smtp.starttls.enable=true
+          -Djava.net.preferIPv4Stack=true -Djava.net.preferIPv4Addresses'
+      java:
+        jdk_version: '7'
+        install_flavor: 'oracle'
+        oracle:
+          accept_oracle_download_terms: 'true'
